@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gervigreindarkeppni</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .quiz-screen {
+            display: none;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            color: #333;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            background: white;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .option.wrong {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .example-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-style: italic;
+            color: #555;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .explanation {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .explanation h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .explanation p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .score-display {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .score-display .score {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .score-display .label {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .result-emoji {
+            font-size: 5em;
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 1.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .tips-box {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .tips-box h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .tips-box ul {
+            list-style-position: inside;
+            color: #555;
+            line-height: 2;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .start-screen h1 {
+                font-size: 2em;
+            }
+
+            .question-text {
+                font-size: 1.2em;
+            }
+
+            .option {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <h1>🤖 Hvernig tala ég við gervigreind?</h1>
+            <p>Lærðu að tjá þig skýrt og fá betri svör frá gervigreind!</p>
+            <p style="font-size: 1em; color: #888;">📝 10 spurningar | ⏱️ Engin tímamörk | 🏆 Fáðu endurgjöf</p>
+            <button class="btn btn-primary" onclick="startQuiz()">🚀 Byrja!</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div class="quiz-screen" id="quizScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="question-header">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+            </div>
+
+            <div id="exampleBox" class="example-box" style="display: none;"></div>
+
+            <div class="options" id="optionsContainer"></div>
+
+            <div class="explanation" id="explanation">
+                <h3>💡 Útskýring:</h3>
+                <p id="explanationText"></p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none;">
+                    Næsta spurning →
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="resultScreen">
+            <div class="result-emoji" id="resultEmoji"></div>
+            <div class="result-message" id="resultMessage"></div>
+            
+            <div class="score-display">
+                <div class="score" id="finalScore"></div>
+                <div class="label">stig af 100</div>
+            </div>
+
+            <div class="tips-box">
+                <h3>🌟 Þú lærðir:</h3>
+                <ul id="learningPoints"></ul>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="startQuiz()">🔄 Spila aftur</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Hvað er best að segja við gervigreind ef þú vilt fá hjálp við stærðfræðiverkefni?",
+                options: [
+                    "hjálp",
+                    "Getur þú hjálpað mér við stærðfræði?",
+                    "Ég er með stærðfræðiverkefni um brot. Getur þú útskýrt hvernig á að leggja saman 2/3 og 1/4?",
+                    "stærðfræði"
+                ],
+                correct: 2,
+                explanation: "Því skýrari og nákvæmari sem þú ert, því betri svör færðu! Gervigreindin þarf að vita nákvæmlega við hvað þú vilt fá hjálp.",
+                type: "multiple-choice"
+            },
+            {
+                question: "Þú færð ekki nógu gott svar frá gervigreindinni. Hvað ættir þú að gera?",
+                options: [
+                    "Gefa upp og prófa eitthvað annað",
+                    "Endurtaka nákvæmlega sömu spurningu aftur",
+                    "Útskýra betur hvað þú ert að leita að og gefa meiri upplýsingar",
+                    "Kvarta undan því að gervigreindin skilji ekki"
+                ],
+                correct: 2,
+                explanation: "Ef fyrsta svarið er ekki nógu gott skaltu bæta við upplýsingum, útskýra betur eða nálgast spurninguna á annan hátt. Gervigreindin lærir af samhenginu sem þú gefur henni!",
+                type: "multiple-choice"
+            },
+            {
+                question: "Hvaða fyrirspurn er best til að fá góða sögu?",
+                example: "Þú vilt að gervigreindin skrifi sögu fyrir þig.",
+                options: [
+                    "Skrifaðu sögu",
+                    "Skrifaðu skemmtilega sögu um draug",
+                    "Skrifaðu spennandi sögu um draug í gömlum skóla, um 500 orð að lengd, sem hentar 13 ára barni",
+                    "Sögu takk"
+                ],
+                correct: 2,
+                explanation: "Með því að segja nákvæmlega hvað þú vilt (tegund sögu, lengd, aldurshóp) færðu miklu betra svar sem hentar þínum þörfum!",
+                type: "comparison"
+            },
+            {
+                question: "Hvað af eftirfarandi er ekki góð leið til að tala við gervigreind?",
+                options: [
+                    "Nota heilu setningar með greinarmerkjum",
+                    "Gefa samhengi og útskýra hvað þú vilt",
+                    "Skrifa allt í HÁSTÖFUM og nota mörg upphrópunarmerki!!!",
+                    "Vera kurteislegur og skýr"
+                ],
+                correct: 2,
+                explanation: "Þú þarft ekki að öskra á gervigreind! Skrifaðu eðlilega eins og þú værir að tala við kennara eða vin. Hástafir og mörg merki hjálpa ekki.",
+                type: "multiple-choice"
+            },
+            {
+                question: "Þú vilt að gervigreindin útskýri erfitt hugtak. Hvað segir þú?",
+                options: [
+                    "Hvað þýðir lýðræði?",
+                    "Getur þú útskýrt lýðræði á einfaldan hátt fyrir 13 ára barn með dæmum úr daglegu lífi?",
+                    "lýðræði",
+                    "Útskýrðu lýðræði með flóknum orðum"
+                ],
+                correct: 1,
+                explanation: "Segðu gervigreindinni hvernig þú vilt fá útskýringuna (einfalt mál, með dæmum, fyrir þinn aldur). Þá færðu svar sem þú skilur virkilega!",
+                type: "multiple-choice"
+            },
+            {
+                question: "Hvaða nálgun er best þegar þú vilt að gervigreindin leiðrétti ritgerð fyrir þig?",
+                example: "Þú ert búinn að skrifa ritgerð og vilt fá hjálp.",
+                options: [
+                    "Lesa yfir",
+                    "Getur þú lesið þetta?",
+                    "Getur þú lesið yfir þessa ritgerð og bent mér á málfræðivillur, óskýrar setningar og gefið tillögur að betri uppbyggingu?",
+                    "Laga þetta"
+                ],
+                correct: 2,
+                explanation: "Segðu nákvæmlega hvað þú vilt að gervigreindin athugi - málfræði, uppbyggingu, efnið, orðaforða. Þá færðu nákvæmlega þá hjálp sem þú þarft!",
+                type: "comparison"
+            },
+            {
+                question: "Hvað er mikilvægast þegar þú spyrð gervigreind um eitthvað?",
+                options: [
+                    "Að nota sem flest orð",
+                    "Að vera skýr og gefa upplýsingar um samhengið",
+                    "Að nota erfið orð til að virðast gáfaður",
+                    "Að spyrja eins stutt og mögulegt er"
+                ],
+                correct: 1,
+                explanation: "Skýrleiki og samhengi eru lykilatriði! Þú þarft ekki að nota erfið orð eða mörg orð - bara að vera skýr um hvað þú vilt.",
+                type: "multiple-choice"
+            },
+            {
+                question: "Gervigreindin misskilur spurninguna þína. Hvað gerir þú?",
+                options: [
+                    "Endurorda spurninguna á annan hátt eða bæti við frekari upplýsingum",
+                    "Skrifa 'þú skilur ekki' og hætta",
+                    "Spyrja nákvæmlega sömu spurningu 10 sinnum",
+                    "Segja gervigreindinni að hún sé vitlaus"
+                ],
+                correct: 0,
+                explanation: "Ef gervigreindin misskilur þig skaltu prófa að útskýra á annan hátt eða gefa meiri upplýsingar. Það er náttúrlegt að þurfa að skýra hlutina betur stundum!",
+                type: "multiple-choice"
+            },
+            {
+                question: "Hvaða spurning gefur betri niðurstöðu?",
+                example: "Þú ert að undirbúa kynningu um sólarkerfið.",
+                options: [
+                    "Segðu mér um sólarkerfið",
+                    "Getur þú gefið mér 5 áhugaverðar staðreyndir um sólarkerfið sem henta fyrir kynningu í 5 mínútur?",
+                    "Sólarkerfið",
+                    "Hvað er sólarkerfið?"
+                ],
+                correct: 1,
+                explanation: "Með því að segja hvað þú ætlar að gera með upplýsingarnar (kynningu, 5 mínútur) og hvað þú vilt fá (5 staðreyndir), færðu nákvæmlega það sem þú þarft!",
+                type: "comparison"
+            },
+            {
+                question: "Hvað er gott að gera þegar þú byrjar að vinna með gervigreind að verkefni?",
+                options: [
+                    "Segja bara 'halló' og sjá hvað gerist",
+                    "Útskýra um hvað verkefnið snýst og hvaða hjálp þú þarft",
+                    "Byrja strax að spyrja án þess að gefa neinar upplýsingar",
+                    "Gera ráð fyrir að gervigreindin viti allt um þig"
+                ],
+                correct: 1,
+                explanation: "Gervigreindin veit ekkert um þig eða verkefnið þitt nema þú segir henni það! Gefðu henni upplýsingar um samhengið í upphafi svo hún geti hjálpað þér sem best.",
+                type: "multiple-choice"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = 0;
+
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions = 0;
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const progress = ((currentQuestion) / questions.length) * 100;
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('questionNumber').textContent = `Spurning ${currentQuestion + 1} af ${questions.length}`;
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Show example if exists
+            const exampleBox = document.getElementById('exampleBox');
+            if (question.example) {
+                exampleBox.textContent = '📌 Dæmi: ' + question.example;
+                exampleBox.style.display = 'block';
+            } else {
+                exampleBox.style.display = 'none';
+            }
+            
+            // Create options
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('explanation').classList.remove('show');
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => option.classList.add('disabled'));
+            
+            // Mark selected
+            options[selectedIndex].classList.add('selected');
+            
+            // Check if correct
+            const isCorrect = selectedIndex === question.correct;
+            
+            setTimeout(() => {
+                // Show correct answer
+                options[question.correct].classList.add('correct');
+                
+                // If wrong, show wrong answer
+                if (!isCorrect) {
+                    options[selectedIndex].classList.remove('selected');
+                    options[selectedIndex].classList.add('wrong');
+                } else {
+                    score += 10;
+                }
+                
+                // Show explanation
+                document.getElementById('explanationText').textContent = question.explanation;
+                document.getElementById('explanation').classList.add('show');
+                
+                // Show next button
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').textContent = 
+                    currentQuestion < questions.length - 1 ? 'Næsta spurning →' : 'Sjá niðurstöður 🎉';
+                
+                answeredQuestions++;
+            }, 300);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            const percentage = (score / (questions.length * 10)) * 100;
+            
+            // Set emoji and message based on score
+            let emoji, message;
+            if (percentage >= 90) {
+                emoji = '🏆';
+                message = 'Frábært! Þú ert snillingur í að tala við gervigreind!';
+            } else if (percentage >= 70) {
+                emoji = '🌟';
+                message = 'Vel gert! Þú hefur góð tök á þessu!';
+            } else if (percentage >= 50) {
+                emoji = '👍';
+                message = 'Ekki slæmt! Þú ert á góðri leið!';
+            } else {
+                emoji = '💪';
+                message = 'Ekki stress! Prófaðu aftur og þú munt bara batna!';
+            }
+            
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('finalScore').textContent = score;
+            
+            // Learning points
+            const learningPoints = [
+                'Vertu skýr og nákvæm í fyrirspurnum',
+                'Gefðu upplýsingar um samhengið svo gervigreindin skilji betur',
+                'Segðu hvernig þú vilt fá svarið (einfalt mál, með dæmum o.s.frv.)',
+                'Ekki hræðast að orða spurningar á nýjan hátt eða bæta við upplýsingum',
+                'Vertu eðlilegur - engin þörf á hástöfum eða mörgum upphrópunarmerkjum!'
+            ];
+            
+            const learningList = document.getElementById('learningPoints');
+            learningList.innerHTML = '';
+            learningPoints.forEach(point => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                learningList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
